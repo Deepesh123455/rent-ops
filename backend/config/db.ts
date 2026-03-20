@@ -1,26 +1,5 @@
-type PaymentStatus = "pending" | "paid" | "failed";
+import {type Location } from "../interfaces/location.interface.js";
 
-export interface PaymentRecord {
-    date: string;
-    amount: number;
-    status: PaymentStatus;
-    reference: string;
-}
-
-export interface Location {
-  id: string;
-  city: string;
-  owner: string;
-  rent: number;
-  gst: number;
-  total: number;
-  tds: number;
-  finalPayable: number;
-  status: PaymentStatus;
-  adjustments: number;
-  remarks: string;
-  history: PaymentRecord[];
-}
 
 export const mockLocations: Location[] = [
   {
