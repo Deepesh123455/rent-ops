@@ -1,7 +1,7 @@
 import {type Location } from "../interfaces/location.interface.js";
 
 
-export const mockLocations: Location[] = [
+export const mockDatabase: Location[] = [
   {
     id: "loc-001",
     city: "Bazpur",

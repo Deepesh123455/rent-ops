@@ -1,4 +1,4 @@
-import { mockLocations } from "../config/db.js";
+import { mockDatabase } from "../config/db.js";
 import {
   type Location,
   type LocationSummary,
@@ -12,7 +12,7 @@ export class LocationRepository {
 
   public async getAllLocations(): Promise<Location[]> {
     await this.simulateDBDelay();
-    return structuredClone(mockLocations);
+    return structuredClone(mockDatabase);
   }
 
   public async getLocationsByIds(ids: string[]): Promise<Location[]> {
@@ -20,7 +20,7 @@ export class LocationRepository {
 
     
     const idSet = new Set(ids);
-    const locationById = mockLocations.filter((loc) => idSet.has(loc.id));
+    const locationById = mockDatabase.filter((loc) => idSet.has(loc.id));
 
     return structuredClone(locationById);
   }
@@ -31,7 +31,7 @@ export class LocationRepository {
 
     const idSet = new Set(ids);
 
-    const summary = mockLocations.reduce(
+    const summary = mockDatabase.reduce(
       (acc, curr) => {
         if (idSet.has(curr.id)) {
           acc.total_rent_payable += curr.rent;
