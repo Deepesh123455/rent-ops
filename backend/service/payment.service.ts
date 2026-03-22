@@ -8,7 +8,6 @@ export class PaymentService {
   ) {}
   private async executePaymentSimulation(
     id: string,
-    amount: number,
   ): Promise<{ success: boolean; data?: Location; error?: string }> {
     const locations = await this.locationService.getLocationsByIds([id]);
     if (locations.length === 0)
@@ -16,14 +15,11 @@ export class PaymentService {
 
     const location = locations[0];
 
-    // Idempotency / Double-charge protection
+    
     if (location?.status === "paid") {
       return { success: false, error: "Already paid" };
     }
-    if (location?.finalPayable !== amount) {
-      return { success: false, error: "Amount mismatch" };
-    }
-    // 80% Success Rate Simulation
+    
     const isSuccess = Math.random() > 0.2;
     const finalStatus = isSuccess ? "paid" : "failed";
 
@@ -45,11 +41,7 @@ export class PaymentService {
       : { success: false, error: "Bank network timeout" };
   }
 
-  public async failedPaymentRetries(
-    id: string,
-    maxRetries: number = 3,
-    amount: number,
-  ) {
+  public async failedPaymentRetries(id: string, maxRetries: number = 3) {
     let retries = 0;
     if (!id) {
       return {
@@ -61,11 +53,24 @@ export class PaymentService {
     while (retries < maxRetries) {
       retries++;
       console.log(`[Payment Attempt ${retries}/${maxRetries}] for ${id}`);
-      const status = await this.executePaymentSimulation(id, amount);
-      if (status.success || status.error === "paid") {
+      const status = await this.executePaymentSimulation(id);
+      if (status.success) {
         return {
           ...status,
           message: `payment got successful at attempt ${retries}`,
+        };
+      }
+      if (
+        status.error === "Already paid" ||
+        status.error === "Location not found"
+      ) {
+        console.log(
+          `[Payment Aborted] ${id} is ${status.error}. No retries needed.`,
+        );
+        return {
+          success: false,
+          error: status.error,
+          message: `Payment skipped: ${status.error}`, 
         };
       }
 
@@ -80,10 +85,7 @@ export class PaymentService {
     };
   }
 
-  public async bulkPaymentSimulation(
-    ids: string[],
-    expectedTotalAmount: number,
-  ) {
+  public async bulkPaymentSimulation(ids: string[], amount: number) {
     if (!Array.isArray(ids) || ids.length === 0) {
       throw new Error("Select multiple locations for the bulk payment");
     }
@@ -95,9 +97,9 @@ export class PaymentService {
       0,
     );
 
-    if (actualTotalAmount !== expectedTotalAmount) {
+    if (actualTotalAmount > amount) {
       throw new Error(
-        `Amount mismatch detected. Expected total is ${expectedTotalAmount}, but calculated total is ${actualTotalAmount}. Transaction aborted for security.`,
+        `insufficient Amount for bulk payment. Expected ₹${amount}, but calculated ₹${actualTotalAmount}.`,
       );
     }
 
@@ -116,7 +118,7 @@ export class PaymentService {
         return;
       }
 
-      const result = await this.failedPaymentRetries(id, 2, amount);
+      const result = await this.failedPaymentRetries(id, 2);
 
       if (result.success) {
         successfulIds.push(id);

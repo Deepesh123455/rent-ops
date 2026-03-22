@@ -8,7 +8,7 @@ export class PaymentController {
 
   public paySingle = async (req: Request, res: Response): Promise<void> => {
     try {
-      const { location_id, amount } = req.body;
+      const { location_id } = req.params;
 
       if (!location_id) {
         res
@@ -28,7 +28,7 @@ export class PaymentController {
       const result = await this.paymentService.failedPaymentRetries(
         location_id as string,
         3,
-        amount as number,
+        
       );
 
       if (result.success) {

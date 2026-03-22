@@ -1,5 +1,6 @@
 import type { Request, Response } from "express";
 import { UtilitiesService } from "../service/utilites.service.js";
+
 export class UtilitiesController {
   constructor(
     private readonly utilitiesService: UtilitiesService = new UtilitiesService(),
@@ -7,28 +8,36 @@ export class UtilitiesController {
 
   public payUtilities = async (req: Request, res: Response): Promise<void> => {
     try {
-      const { location_ids, total_amount } = req.body;
+      const { location_ids } = req.params;
 
-      if (!Array.isArray(location_ids) || location_ids.length === 0) {
+      if (!location_ids) {
         res.status(400).json({
           success: false,
-          message: "location_ids must be a non-empty array.",
+          message: "Please provide valid location IDs.",
         });
         return;
       }
 
-      if (typeof total_amount !== "number") {
+      let idsArray: string[] = [];
+
+      if (typeof location_ids === "string") {
+        idsArray = location_ids
+          .split(",")
+          .map((id: string) => id.trim())
+          .filter((id: string) => id.length > 0);
+      } else if (Array.isArray(location_ids)) {
+        idsArray = location_ids as string[];
+      }
+
+      if (idsArray.length === 0) {
         res.status(400).json({
           success: false,
-          message: "Valid total_amount is required for security verification.",
+          message: "Please provide valid comma-separated location IDs.",
         });
         return;
       }
 
-      const result = await this.utilitiesService.payUtilities(
-        location_ids,
-        total_amount,
-      );
+      const result = await this.utilitiesService.payUtilities(idsArray);
 
       res.status(200).json(result);
     } catch (error: any) {

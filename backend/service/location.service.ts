@@ -19,7 +19,7 @@ export class LocationService {
     return await this.locationRepository.getLocationsByIds(ids);
   }
   public async getLocationSummary(ids?: string[]): Promise<LocationSummary[]> {
-    // Redundant await hataya for cleaner execution
+    
     return this.locationRepository.getLocationSummary(ids);
   }
 }

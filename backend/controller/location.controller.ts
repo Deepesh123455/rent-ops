@@ -27,19 +27,31 @@ export class LocationController {
     res: Response,
   ): Promise<void> => {
     try {
-      const { ids } = req.body;
+      const idsParam = req.query.ids;
 
-      // Type checking and validation
-      if (!Array.isArray(ids) || ids.length === 0) {
+      if (!idsParam || typeof idsParam !== "string") {
         res.status(400).json({
           success: false,
           message:
-            "Please provide a valid array of location IDs in the 'ids' field.",
+            "Please provide location IDs in the URL query, e.g., ?ids=loc-1,loc-2",
         });
         return;
       }
 
-      const locations = await this.locationService.getLocationsByIds(ids);
+      const idsArray = idsParam
+        .split(",")
+        .map((id) => id.trim())
+        .filter((id) => id.length > 0);
+
+      if (idsArray.length === 0) {
+        res.status(400).json({
+          success: false,
+          message: "Please provide a valid array of location IDs.",
+        });
+        return;
+      }
+
+      const locations = await this.locationService.getLocationsByIds(idsArray);
 
       res.status(200).json({
         success: true,
@@ -49,7 +61,6 @@ export class LocationController {
       res.status(400).json({ success: false, message: error.message });
     }
   };
-
   public getLocationSummary = async (
     req: Request,
     res: Response,
@@ -60,7 +71,6 @@ export class LocationController {
       const idsParam = req.query.ids;
       let idsArray: string[] | undefined = undefined;
 
-      // MANDATE CHECK 1: Agar URL mein ids hain, toh properly parse karo
       if (idsParam) {
         if (typeof idsParam !== "string") {
           res.status(400).json({
@@ -71,13 +81,11 @@ export class LocationController {
           return;
         }
 
-        // String ko split karo, aage-peeche ke spaces hatao, aur empty strings hatao
         idsArray = idsParam
           .split(",")
           .map((id) => id.trim())
           .filter((id) => id.length > 0);
 
-        // MANDATE CHECK 2: Agar comma toh lagaya par IDs nahi di (?ids=,,)
         if (idsArray.length === 0) {
           res.status(400).json({
             success: false,
@@ -87,12 +95,11 @@ export class LocationController {
         }
       }
 
-      // Agar idsArray undefined hai, toh Repository automatically sabka total nikal degi
       const summary = await this.locationService.getLocationSummary(idsArray);
 
       res.status(200).json({
         success: true,
-        data: summary[0], // Array ke andar se object nikal kar clean format mein bheja
+        data: summary[0],
       });
     } catch (error: any) {
       console.error("Summary API Error:", error);

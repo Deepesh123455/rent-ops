@@ -5,10 +5,7 @@ export class UtilitiesService {
     private readonly locationService: LocationService = new LocationService(),
   ) {}
 
-  public async payUtilities(
-    ids: string[],
-    expectedTotalAmount: number,
-  ): Promise<{
+  public async payUtilities(ids: string[]): Promise<{
     success: boolean;
     totalAmount: number;
     processedCount: number;
@@ -29,12 +26,6 @@ export class UtilitiesService {
       (acc, curr) => acc + curr.finalPayable,
       0,
     );
-
-    if (actualTotalAmount !== expectedTotalAmount) {
-      throw new Error(
-        `Amount mismatch detected. Expected ₹${expectedTotalAmount}, but calculated ₹${actualTotalAmount}. Transaction aborted.`,
-      );
-    }
 
     return {
       success: true,

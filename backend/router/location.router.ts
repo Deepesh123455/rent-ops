@@ -6,8 +6,9 @@ const LocationRouter : Router = Router();
 const locationController : LocationController = new LocationController();
 
 LocationRouter.get("/locations",locationController.getAllLocations);
-LocationRouter.get("/locations/:locations_id",locationController.getLocationsByIds);
-LocationRouter.get("locations/summary",locationController.getLocationSummary);
+LocationRouter.get("/locations/summary",locationController.getLocationSummary);
+LocationRouter.get("/locations/filter", locationController.getLocationsByIds);
+
 
 
 export default LocationRouter;

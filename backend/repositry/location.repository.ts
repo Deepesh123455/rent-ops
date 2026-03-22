@@ -28,7 +28,7 @@ export class LocationRepository {
 
     let dataToProcess = mockDatabase;
 
-    // MANDATE CHECK: Agar specific IDs bheji hain, toh sirf unhi ka data nikal
+   
     if (ids && ids.length > 0) {
       const idSet = new Set(ids);
       dataToProcess = mockDatabase.filter((loc) => idSet.has(loc.id));
