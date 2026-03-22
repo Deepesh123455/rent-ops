@@ -1,4 +1,4 @@
-// backend/interfaces/location.interface.ts
+
 export interface HistoryRecord {
   date: string;
   amount: number;
