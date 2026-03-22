@@ -18,19 +18,8 @@ export class LocationService {
     }
     return await this.locationRepository.getLocationsByIds(ids);
   }
-  public async getLocationSummary(ids: string[]): Promise<LocationSummary[]> {
-    if (!ids || ids.length === 0) {
-      return [
-        {
-          total_rent_payable: 0,
-          total_gst_payable: 0,
-          total_tds_payable: 0,
-          total_adjustments: 0,
-          total_final_payable: 0,
-          total_locations: 0,
-        },
-      ];
-    }
-    return await this.locationRepository.getLocationSummary(ids);
+  public async getLocationSummary(ids?: string[]): Promise<LocationSummary[]> {
+    // Redundant await hataya for cleaner execution
+    return this.locationRepository.getLocationSummary(ids);
   }
 }
