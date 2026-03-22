@@ -2,7 +2,7 @@ import { mockDatabase } from "../config/db.js";
 import { type Location } from "../interfaces/location.interface.js";
 
 export class PaymentRepository {
-  private dbDelaySimulation(ms: number = 1000): Promise<void> {
+  private simulateDBDelay(ms: number = 1000): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
@@ -11,7 +11,7 @@ export class PaymentRepository {
     newStatus: "paid" | "failed",
     transactionLog: any,
   ): Promise<Location | null> {
-    await this.dbDelaySimulation(1000);
+    await this.simulateDBDelay(1000);
 
     const location = mockDatabase.find((loc) => loc.id === location_id);
 
