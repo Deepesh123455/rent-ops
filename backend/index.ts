@@ -7,9 +7,17 @@ import dotenv from "dotenv";
 import LocationRouter from "./router/location.router.js";
 import PaymentRouter from "./router/payment.router.js";
 import UtilitiesRouter from "./router/utilities.router.js";
+import cors from "cors";
 dotenv.config();
 const app: Application = express();
 
+
+
+app.use(cors({
+  origin: "http://localhost:5173", // Direct string daalo
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true
+}))
 app.use(express.json());
 // app.use(express.urlencoded({ extended: true, limit: "10kb" }));
 app.get("/health", (req: Request, res: Response) => {

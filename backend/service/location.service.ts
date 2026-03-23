@@ -18,8 +18,14 @@ export class LocationService {
     }
     return await this.locationRepository.getLocationsByIds(ids);
   }
+
+  public async getLocationsByStatus(statuses: string[]): Promise<Location[]> {
+    if (!statuses || statuses.length === 0) {
+      throw new Error("Please provide at least one status");
+    }
+    return await this.locationRepository.getLocationsByStatus(statuses);
+  }
   public async getLocationSummary(ids?: string[]): Promise<LocationSummary[]> {
-    
     return this.locationRepository.getLocationSummary(ids);
   }
 }

@@ -22,13 +22,22 @@ export class LocationRepository {
 
     return structuredClone(locationById);
   }
+  public async getLocationsByStatus(statuses: string[]): Promise<Location[]> {
+    await this.simulateDBDelay();
 
+    
+    const statusSet = new Set(statuses.map((s) => s.toLowerCase()));
+    const locationsByStatus = mockDatabase.filter((loc) =>
+      statusSet.has(loc.status.toLowerCase()),
+    );
+
+    return structuredClone(locationsByStatus);
+  }
   public async getLocationSummary(ids?: string[]): Promise<LocationSummary[]> {
-    await this.simulateDBDelay(); // Tera original delay function
+    await this.simulateDBDelay(); 
 
     let dataToProcess = mockDatabase;
 
-   
     if (ids && ids.length > 0) {
       const idSet = new Set(ids);
       dataToProcess = mockDatabase.filter((loc) => idSet.has(loc.id));

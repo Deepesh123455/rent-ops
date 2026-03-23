@@ -28,7 +28,6 @@ export class PaymentController {
       const result = await this.paymentService.failedPaymentRetries(
         location_id as string,
         3,
-        
       );
 
       if (result.success) {
@@ -43,44 +42,17 @@ export class PaymentController {
 
   public payBulk = async (req: Request, res: Response): Promise<void> => {
     try {
-      const { location_ids, total_amount } = req.body;
-
-      if (!Array.isArray(location_ids) || location_ids.length === 0) {
-        res
-          .status(400)
-          .json({
-            success: false,
-            message: "location_ids must be a non-empty array",
-          });
-        return;
-      }
-
-      if (typeof total_amount !== "number") {
-        res
-          .status(400)
-          .json({
-            success: false,
-            message:
-              "Valid total_amount is required for bulk processing security",
-          });
-        return;
-      }
-
       const idempotencyKey = req.headers["x-idempotency-key"];
       if (!idempotencyKey) {
-        res
-          .status(400)
-          .json({
-            success: false,
-            message: "Idempotency key is required for bulk payments",
-          });
+        res.status(400).json({
+          success: false,
+          message: "Idempotency key is required for bulk payments",
+        });
         return;
       }
 
-      const result = await this.paymentService.bulkPaymentSimulation(
-        location_ids,
-        total_amount,
-      );
+      const result = await this.paymentService.bulkPaymentSimulation();
+
       res.status(200).json({ success: true, data: result });
     } catch (error: any) {
       res.status(400).json({ success: false, message: error.message });

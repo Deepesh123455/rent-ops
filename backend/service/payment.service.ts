@@ -15,11 +15,10 @@ export class PaymentService {
 
     const location = locations[0];
 
-    
     if (location?.status === "paid") {
       return { success: false, error: "Already paid" };
     }
-    
+
     const isSuccess = Math.random() > 0.2;
     const finalStatus = isSuccess ? "paid" : "failed";
 
@@ -70,7 +69,7 @@ export class PaymentService {
         return {
           success: false,
           error: status.error,
-          message: `Payment skipped: ${status.error}`, 
+          message: `Payment skipped: ${status.error}`,
         };
       }
 
@@ -85,45 +84,32 @@ export class PaymentService {
     };
   }
 
-  public async bulkPaymentSimulation(ids: string[], amount: number) {
-    if (!Array.isArray(ids) || ids.length === 0) {
-      throw new Error("Select multiple locations for the bulk payment");
+  public async bulkPaymentSimulation() {
+    const locations = await this.locationService.getLocationsByStatus([
+      "Pending",
+      "Failed",
+    ]);
+
+    if (!locations || locations.length === 0) {
+      throw new Error("No pending or failed payments found to process.");
     }
-
-    const locations = await this.locationService.getLocationsByIds(ids);
-
-    const actualTotalAmount = locations.reduce(
-      (sum, loc) => sum + loc.finalPayable,
-      0,
-    );
-
-    if (actualTotalAmount > amount) {
-      throw new Error(
-        `insufficient Amount for bulk payment. Expected ₹${amount}, but calculated ₹${actualTotalAmount}.`,
-      );
-    }
-
-    const locationAmountMap = new Map(
-      locations.map((loc) => [loc.id, loc.finalPayable]),
-    );
 
     const successfulIds: string[] = [];
     const failedIds: string[] = [];
+    let totalAmountProcessed = 0;
 
-    const paymentPromises = ids.map(async (id) => {
-      const amount = locationAmountMap.get(id);
+    const paymentPromises = locations.map(async (loc) => {
+      try {
+        const result = await this.failedPaymentRetries(loc.id, 2);
 
-      if (amount === undefined) {
-        failedIds.push(id);
-        return;
-      }
-
-      const result = await this.failedPaymentRetries(id, 2);
-
-      if (result.success) {
-        successfulIds.push(id);
-      } else {
-        failedIds.push(id);
+        if (result.success) {
+          successfulIds.push(loc.id);
+          totalAmountProcessed += loc.finalPayable;
+        } else {
+          failedIds.push(loc.id);
+        }
+      } catch (error) {
+        failedIds.push(loc.id);
       }
     });
 
@@ -131,9 +117,10 @@ export class PaymentService {
 
     return {
       message: "Bulk payment simulation completed",
-      total_processed: ids.length,
+      total_locations_found: locations.length,
       success_count: successfulIds.length,
       failed_count: failedIds.length,
+      total_amount_processed: totalAmountProcessed,
       successful_ids: successfulIds,
       failed_ids: failedIds,
     };

@@ -61,6 +61,46 @@ export class LocationController {
       res.status(400).json({ success: false, message: error.message });
     }
   };
+  public getLocationsByStatus = async (
+    req: Request,
+    res: Response,
+  ): Promise<void> => {
+    try {
+      const statusParam = req.query.status;
+
+      if (!statusParam || typeof statusParam !== "string") {
+        res.status(400).json({
+          success: false,
+          message:
+            "Please provide statuses in the URL query, e.g., ?status=pending,failed",
+        });
+        return;
+      }
+
+      const statusArray = statusParam
+        .split(",")
+        .map((status) => status.trim())
+        .filter((status) => status.length > 0);
+
+      if (statusArray.length === 0) {
+        res.status(400).json({
+          success: false,
+          message: "Please provide a valid array of statuses.",
+        });
+        return;
+      }
+
+      const locations =
+        await this.locationService.getLocationsByStatus(statusArray);
+
+      res.status(200).json({
+        success: true,
+        data: locations,
+      });
+    } catch (error: any) {
+      res.status(400).json({ success: false, message: error.message });
+    }
+  };
   public getLocationSummary = async (
     req: Request,
     res: Response,
