@@ -2,6 +2,8 @@ import FinancialSummary from "./pages/FinancialSummary";
 import axios from "axios";
 import { useQuery } from "@tanstack/react-query";
 import LocationsDashboard from "./pages/LocationsDashboard";
+import BulkPayment from "./pages/BulkPayment";
+
 
 interface SummaryApiResponse {
   total_rent_payable: number;
@@ -43,6 +45,7 @@ const App = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 p-8">
+      <BulkPayment/>
       <FinancialSummary
         totalRent={data?.total_rent_payable || 0}
         totalGst={data?.total_gst_payable || 0}
